@@ -35,10 +35,8 @@ const App = () => {
       <Add persons={persons} newName={newName} newNumber={newNumber}
         setPersons={setPersons} setNewName={setNewName} setNewNumber={setNewNumber}
         changeName={handleNameChange} changeNumber={handleNumberChange} />
-
       <h2>Numbers</h2>
       <Rows persons={persons} newSearch={newSearch} />
-
     </div>
   )
 }
