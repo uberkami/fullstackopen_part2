@@ -11,6 +11,99 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [newSearch, setSearchName] = useState('')
 
+
+  const handleNameChange = (event) => {
+    console.log("handleNameChange ", event.target.value)
+    setNewName(event.target.value)
+  }
+
+  const handleNumberChange = (event) => {
+    console.log("handleNumberChange ", event.target.value)
+    setNewNumber(event.target.value)
+  }
+
+  const handleSearchChange = (event) => {
+    console.log("handleSearchChange ", event.target.value)
+    setSearchName(event.target.value)
+  }
+
+
+  return (
+    <div>
+      <h2>Phonebook</h2>
+      <Filter newSearch={newSearch} searchChange={handleSearchChange} />
+      <Add persons={persons} newName={newName} newNumber={newNumber}
+        setPersons={setPersons} setNewName={setNewName} setNewNumber={setNewNumber}
+        changeName={handleNameChange} changeNumber={handleNumberChange} />
+
+      <h2>Numbers</h2>
+      <Rows persons={persons} newSearch={newSearch} />
+
+    </div>
+  )
+}
+
+
+const Filter = (props) => {
+  const newSearch = props.newSearch
+  const searchChange = props.searchChange
+  return (
+    <div>
+      filter shown with:
+  <input
+        value={newSearch}
+        onChange={searchChange}
+      />
+    </div>
+  )
+}
+
+
+const Rows = (props) => {
+  const persons = props.persons
+  const newSearch = props.newSearch
+  const rows = () => {
+    console.log("newSearch in rows: ", newSearch)
+    console.log("persons in rows: ", persons)
+    if (newSearch === '') {
+      return (
+        persons.map(person =>
+          <div key={person.name}>
+            {person.name} {person.phoneNumber}
+          </div>
+        ))
+    } else {
+      const searchList = persons.filter((person) => person.name.toLowerCase().includes(newSearch.toLowerCase()))
+      if (searchList.length === 0) {
+        return (
+          <div >
+            Person with the name {newSearch} was not found!
+          </div>)
+      } else {
+        return (
+          searchList.map(person =>
+            <div key={person.name}>
+              {person.name} {person.phoneNumber}
+            </div>
+          ))
+      }
+    }
+  }
+  return rows()
+}
+
+const Add = (props) => {
+  const persons = props.persons
+  const newName = props.newName
+  const newNumber = props.newNumber
+  const setPersons = props.setPersons
+  const setNewName = props.setNewName
+  const setNewNumber = props.setNewNumber
+  const changeName = props.changeName
+  const changeNumber = props.changeNumber
+
+  console.log('Personlist in Add: ', persons)
+
   const addName = (event) => {
     const nameIncluded = persons.filter((person) => person.name === newName)
     const numberIncluded = persons.filter((person) => person.phoneNumber === newNumber)
@@ -35,84 +128,29 @@ const App = () => {
       setNewNumber("")
     }
   }
-
-  const handleNameChange = (event) => {
-    console.log("handleNameChange ", event.target.value)
-    setNewName(event.target.value)
-  }
-
-  const handleNumberChange = (event) => {
-    console.log("handleNumberChange ", event.target.value)
-    setNewNumber(event.target.value)
-  }
-
-  const handleSearchChange = (event) => {
-    console.log("handleSearchChange ", event.target.value)
-    setSearchName(event.target.value)
-  }
-
-  const rows = () => {
-    console.log("newSearch: ", newSearch)
-    if (newSearch === '') {
-      return (
-        persons.map(person =>
-          <div key={person.name}>
-            {person.name} {person.phoneNumber}
-          </div>
-        ))
-    } else {
-      const searchList = persons.filter((person) => person.name.toLowerCase().includes(newSearch.toLowerCase()))
-      if (searchList.length === 0) {
-        return (
-          <div >
-            Person with the name {newSearch} was not found!
-  </div>)
-      } else {
-        return (
-          searchList.map(person =>
-            <div key={person.name}>
-              {person.name} {person.phoneNumber}
-            </div>
-          ))
-      }
-    }
-  }
-
   return (
-    <div>
-      <h2>Phonebook</h2>
-      <div>
-        filter shown with:
-      <input
-          value={newSearch}
-          onChange={handleSearchChange}
-        />
-      </div>
-
+    <>
       <h2>add a new</h2>
       <form onSubmit={addName}>
         <div>
           name:
-          <input
+    <input
             value={newName}
-            onChange={handleNameChange}
+            onChange={changeName}
           />
         </div>
         <div>
           number:
-          <input
+    <input
             value={newNumber}
-            onChange={handleNumberChange}
+            onChange={changeNumber}
           />
         </div>
         <div>
           <button type="submit">add</button>
         </div>
       </form>
-      <h2>Numbers</h2>
-      {rows()}
-    </div>
+    </>
   )
 }
-
 export default App
