@@ -1,16 +1,27 @@
-import React, { useState } from 'react'
-
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', phoneNumber: '040-1234567' },
-    { name: 'maleck', phoneNumber: '1234567' },
-    { name: 'Lulu', phoneNumber: '123456' },
-    { name: 'Lilia', phoneNumber: '123' }
-  ])
+  // const [persons, setPersons] = useState([
+  //   { name: 'Arto Hellas', number: '040-1234567' },
+  //   { name: 'maleck', number: '1234567' },
+  //   { name: 'Lulu', number: '123456' },
+  //   { name: 'Lilia', number: '123' }
+  // ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newSearch, setSearchName] = useState('')
 
+  useEffect(() => {
+    console.log('effect')
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        console.log('promise fulfilled')
+        setPersons(response.data)
+      })
+  }, [])
+  console.log('render', persons.length, 'persons')
 
   const handleNameChange = (event) => {
     console.log("handleNameChange ", event.target.value)
@@ -67,7 +78,7 @@ const Rows = (props) => {
       return (
         persons.map(person =>
           <div key={person.name}>
-            {person.name} {person.phoneNumber}
+            {person.name} {person.number}
           </div>
         ))
     } else {
@@ -81,7 +92,7 @@ const Rows = (props) => {
         return (
           searchList.map(person =>
             <div key={person.name}>
-              {person.name} {person.phoneNumber}
+              {person.name} {person.number}
             </div>
           ))
       }
@@ -104,7 +115,7 @@ const Add = (props) => {
 
   const addName = (event) => {
     const nameIncluded = persons.filter((person) => person.name === newName)
-    const numberIncluded = persons.filter((person) => person.phoneNumber === newNumber)
+    const numberIncluded = persons.filter((person) => person.number === newNumber)
 
     console.log("name included? ", nameIncluded)
 
@@ -112,7 +123,7 @@ const Add = (props) => {
     const nameObject = {
       name: newName,
       date: new Date().toISOString(),
-      phoneNumber: newNumber,
+      number: newNumber,
       id: persons.length + 1,
     }
     if (nameIncluded.length >= 1) {
