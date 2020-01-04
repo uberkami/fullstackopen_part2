@@ -1,2 +1,4 @@
 course_information/node_modules/
 phonebook/node_modules/
+countries/node_modules/
+countries/.env
