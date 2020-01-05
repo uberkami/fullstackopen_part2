@@ -1,10 +1,7 @@
 import React from 'react'
-import Button from './Button'
 
 const Rows = (props) => {
-
     const persons = props.persons
-    // const setPersons = props.setPersons
     const newSearch = props.newSearch
     const deleteNumber = props.deleteNumber
     let listToShow = []
@@ -20,7 +17,7 @@ const Rows = (props) => {
             </div>)
             } else {
                 listToShow = searchList
-                }
+            }
         }
         return (
             listToShow.map(person =>
