@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import Filter from './Components/Filter'
+import Rows from './Components/Rows'
+import Add from './Components/Add'
+import entriesService from './services/entries'
 const App = () => {
-  // const [persons, setPersons] = useState([
-  //   { name: 'Arto Hellas', number: '040-1234567' },
-  //   { name: 'maleck', number: '1234567' },
-  //   { name: 'Lulu', number: '123456' },
-  //   { name: 'Lilia', number: '123' }
-  // ])
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
@@ -14,152 +11,84 @@ const App = () => {
 
   useEffect(() => {
     console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
+    entriesService
+      .getAll()
+      .then(initialPersons => {
+        console.log('initial persons', initialPersons)
+        setPersons(initialPersons)
       })
+
+    console.log('render inside', persons, 'persons')
+    console.log('render inside', persons.length, 'personslength')
   }, [])
-  console.log('render', persons.length, 'persons')
+
+  console.log('render', persons.length, 'persons length')
 
   const handleNameChange = (event) => {
-    console.log("handleNameChange ", event.target.value)
+    // console.log("handleNameChange ", event.target.value)
     setNewName(event.target.value)
   }
 
   const handleNumberChange = (event) => {
-    console.log("handleNumberChange ", event.target.value)
+    // console.log("handleNumberChange ", event.target.value)
     setNewNumber(event.target.value)
   }
 
   const handleSearchChange = (event) => {
-    console.log("handleSearchChange ", event.target.value)
+    // console.log("handleSearchChange ", event.target.value)
     setSearchName(event.target.value)
   }
 
+  const deleteNumber = (personToDelete) => {
+    console.log('delete person id', personToDelete)
+    if (window.confirm(`Are you shure you want to delete ${personToDelete.name}?` )){
+      entriesService
+      .deletePerson(personToDelete.id)
+      .then(setPersons(persons.filter(item => item.id !== personToDelete.id)))
+    }
+  }
 
-  return (
-    <div>
-      <h2>Phonebook</h2>
-      <Filter newSearch={newSearch} searchChange={handleSearchChange} />
-      <Add persons={persons} newName={newName} newNumber={newNumber}
-        setPersons={setPersons} setNewName={setNewName} setNewNumber={setNewNumber}
-        changeName={handleNameChange} changeNumber={handleNumberChange} />
-      <h2>Numbers</h2>
-      <Rows persons={persons} newSearch={newSearch} />
-    </div>
-  )
-}
-
-
-const Filter = (props) => {
-  const newSearch = props.newSearch
-  const searchChange = props.searchChange
-  return (
-    <div>
-      filter shown with:
-  <input
-        value={newSearch}
-        onChange={searchChange}
-      />
-    </div>
-  )
-}
-
-
-const Rows = (props) => {
-  const persons = props.persons
-  const newSearch = props.newSearch
-  const rows = () => {
-    console.log("newSearch in rows: ", newSearch)
-    console.log("persons in rows: ", persons)
-    if (newSearch === '') {
-      return (
-        persons.map(person =>
-          <div key={person.name}>
-            {person.name} {person.number}
-          </div>
-        ))
-    } else {
-      const searchList = persons.filter((person) => person.name.toLowerCase().includes(newSearch.toLowerCase()))
-      if (searchList.length === 0) {
-        return (
-          <div >
-            Person with the name {newSearch} was not found!
-          </div>)
-      } else {
-        return (
-          searchList.map(person =>
-            <div key={person.name}>
-              {person.name} {person.number}
-            </div>
-          ))
+  const updateNumber = (personToUpdate) => {
+    console.log('Person to Update with number', personToUpdate.name, newNumber)
+    if (window.confirm(`Are you shure you want to change the Number of ${personToUpdate.name} to ${newNumber}?` )){
+      const newObject = {
+        name: personToUpdate.name,
+        number: newNumber
       }
-    }
+      
+      entriesService
+      .update(personToUpdate.id, newObject)
+      .then(returnedPersons => {
+        setPersons(returnedPersons)
+        setNewName("")
+        setNewNumber("")
+    })
   }
-  return rows()
 }
 
-const Add = (props) => {
-  const persons = props.persons
-  const newName = props.newName
-  const newNumber = props.newNumber
-  const setPersons = props.setPersons
-  const setNewName = props.setNewName
-  const setNewNumber = props.setNewNumber
-  const changeName = props.changeName
-  const changeNumber = props.changeNumber
-
-  console.log('Personlist in Add: ', persons)
-
-  const addName = (event) => {
-    const nameIncluded = persons.filter((person) => person.name === newName)
-    const numberIncluded = persons.filter((person) => person.number === newNumber)
-
-    console.log("name included? ", nameIncluded)
-
-    event.preventDefault()
-    const nameObject = {
-      name: newName,
-      date: new Date().toISOString(),
-      number: newNumber,
-      id: persons.length + 1,
-    }
-    if (nameIncluded.length >= 1) {
-      alert(`${newName} is already added to phonebook`)
-
-    } else if (numberIncluded.length >= 1) {
-      alert(`${numberIncluded[0].name} has already the number ${newNumber}`)
-    } else {
-      setPersons(persons.concat(nameObject))
-      setNewName("")
-      setNewNumber("")
-    }
+  if (persons.length !== 0) {
+    console.log('render inside return', persons, 'persons')
+    return (
+      <div>
+        <h2>Phonebook</h2>
+        <Filter newSearch={newSearch} searchChange={handleSearchChange} />
+        <Add persons={persons} newName={newName} newNumber={newNumber}
+          setPersons={setPersons} setNewName={setNewName} setNewNumber={setNewNumber}
+          changeName={handleNameChange} changeNumber={handleNumberChange} 
+          updateNumber={updateNumber}/>
+        <h2>Numbers</h2>
+        <Rows persons={persons} newSearch={newSearch} 
+              setPersons={setPersons} deleteNumber={deleteNumber} />
+      </div>
+    )
   }
-  return (
-    <>
-      <h2>add a new</h2>
-      <form onSubmit={addName}>
-        <div>
-          name:
-    <input
-            value={newName}
-            onChange={changeName}
-          />
-        </div>
-        <div>
-          number:
-    <input
-            value={newNumber}
-            onChange={changeNumber}
-          />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-    </>
-  )
+  else {
+    return (
+      <div>loading... </div>
+    )
+  }
 }
+
 export default App
+
+
